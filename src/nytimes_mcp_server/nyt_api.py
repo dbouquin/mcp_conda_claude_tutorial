@@ -8,7 +8,6 @@ server code focused on protocol handling.
 import httpx
 import os
 from typing import Optional, Dict, Any, List
-from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
@@ -18,7 +17,7 @@ class NYTimesBookAPI:
     """
     A wrapper for the NYTimes Books API.
     
-    The Books API provides access to NYTimes book reviews and Best Sellers lists.
+    The Books API provides access to NYTimes Best Sellers lists.
     It requires an API key which should be provided via environment variable.
     """
     
@@ -54,7 +53,7 @@ class NYTimesBookAPI:
         """
         Get books from a specific Best Sellers list.
         
-        This is the most reliable endpoint in the Books API.
+        This is one of the most reliable endpoints in the Books API.
         
         Args:
             list_name: The encoded name of the list (e.g., 'hardcover-fiction').
@@ -143,64 +142,6 @@ class NYTimesBookAPI:
                 logger.error(f"Response body: {e.response.text}")
             raise
     
-    def search_best_sellers_history(
-        self,
-        author: Optional[str] = None,
-        title: Optional[str] = None,
-        isbn: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """
-        Search the Best Sellers history.
-        
-        This searches for books and their history on NYT Best Sellers lists.
-        You can search by author, title, or ISBN.
-        
-        Args:
-            author: Search by author name
-            title: Search by book title
-            isbn: Search by ISBN (10 or 13 digit)
-            
-        Returns:
-            A dictionary containing search results
-            
-        Raises:
-            httpx.HTTPError: If the API request fails
-            ValueError: If no search parameters provided
-        """
-        if not any([author, title, isbn]):
-            raise ValueError("At least one search parameter must be provided")
-        
-        url = f"{self.BASE_URL}/lists/best-sellers/history.json"
-        params = {"api-key": self.api_key}
-        
-        if author:
-            params["author"] = author
-        if title:
-            params["title"] = title
-        if isbn:
-            params["isbn"] = isbn
-        
-        logger.info(f"Searching best sellers history with params: {params}")
-        
-        try:
-            response = self.client.get(url, params=params)
-            response.raise_for_status()
-            
-            data = response.json()
-            results = data.get("results", [])
-            
-            return {
-                "num_results": data.get("num_results", 0),
-                "results": self._format_history_results(results)
-            }
-            
-        except httpx.HTTPError as e:
-            logger.error(f"Error querying NYTimes API: {e}")
-            if hasattr(e, 'response') and e.response is not None:
-                logger.error(f"Response status: {e.response.status_code}")
-                logger.error(f"Response body: {e.response.text}")
-            raise
-    
     def _format_bestseller_books(self, books: List[Dict]) -> List[Dict]:
         """
         Format best seller book information.
@@ -251,31 +192,6 @@ class NYTimesBookAPI:
                 "books": self._format_bestseller_books(lst.get("books", []))
             }
             formatted.append(formatted_list)
-        
-        return formatted
-    
-    def _format_history_results(self, results: List[Dict]) -> List[Dict]:
-        """
-        Format best sellers history results.
-        
-        Args:
-            results: Raw results from the API
-            
-        Returns:
-            A list of formatted result dictionaries
-        """
-        formatted = []
-        
-        for item in results:
-            formatted_item = {
-                "title": item.get("title", "Unknown Title"),
-                "author": item.get("author", "Unknown Author"),
-                "description": item.get("description", ""),
-                "publisher": item.get("publisher", ""),
-                "isbns": item.get("isbns", []),
-                "ranks_history": item.get("ranks_history", [])
-            }
-            formatted.append(formatted_item)
         
         return formatted
     

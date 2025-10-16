@@ -82,40 +82,6 @@ def test_overview():
         return False
 
 
-def test_history_search():
-    """Test searching the best sellers history."""
-    api = NYTimesBookAPI()
-    
-    print("\nTest 3: Search Best Sellers History")
-    print("=" * 60)
-    
-    # Try searching by author
-    print("\nSearching for books by Stephen King...")
-    
-    try:
-        results = api.search_best_sellers_history(author="Stephen King")
-        
-        print(f"✓ Found {results['num_results']} results")
-        
-        if results['results']:
-            first = results['results'][0]
-            print(f"\nFirst result:")
-            print(f"  Title: {first['title']}")
-            print(f"  Author: {first['author']}")
-            print(f"  Publisher: {first['publisher']}")
-            
-            if first['ranks_history']:
-                print(f"  Appeared on {len(first['ranks_history'])} list(s)")
-        
-        api.close()
-        return True
-        
-    except Exception as e:
-        print(f"✗ Test failed: {e}")
-        api.close()
-        return False
-
-
 if __name__ == "__main__":
     print("NYTimes Books API - Diagnostic Tests")
     print("=" * 60)
@@ -125,22 +91,20 @@ if __name__ == "__main__":
         print("\n⚠️  Fix your API key configuration before continuing")
         exit(1)
     
-    # Test 2: Best sellers list (most reliable)
+    # Test 2: Best sellers list
     if not test_best_sellers():
         print("\n⚠️  Basic API connectivity failed")
         print("\nTroubleshooting:")
         print("1. Verify your API key is valid at https://developer.nytimes.com/")
         print("2. Check that you've enabled the Books API for your key")
         print("3. Try regenerating your API key")
-        print("4. Wait a few minutes - new keys may take time to activate")
         exit(1)
     
     # Test 3: Overview
-    test_overview()
-    
-    # Test 4: History search
-    test_history_search()
+    if not test_overview():
+        print("\n⚠️  Overview endpoint failed")
+        exit(1)
     
     print("\n" + "=" * 60)
-    print("✓ API tests complete!")
+    print("✓ All tests passed! Your MCP server is ready to connect to Claude Desktop.")
     print("=" * 60)

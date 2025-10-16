@@ -1,8 +1,7 @@
 """
 MCP Server for NYTimes Books API.
 
-This server exposes tools that allow Claude to search for book reviews and
-access NYTimes Best Sellers lists.
+This server exposes tools that allow Claude to access NYTimes Best Sellers lists.
 """
 
 import logging
@@ -46,68 +45,14 @@ async def list_tools() -> list[Tool]:
     """
     return [
         Tool(
-            name="search_book_reviews",
-            description=(
-                "Search for NYTimes book reviews. You can search by author name, "
-                "book title, ISBN, or a general query. Returns review summaries, "
-                "publication dates, and links to full reviews. Great for finding "
-                "critical reception of books or discovering reviewed books by "
-                "specific authors."
-            ),
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "string",
-                        "description": (
-                            "General search query. If provided without other "
-                            "parameters, searches in book titles."
-                        )
-                    },
-                    "author": {
-                        "type": "string",
-                        "description": "Search by author name (e.g., 'Toni Morrison')"
-                    },
-                    "title": {
-                        "type": "string",
-                        "description": "Search by book title (e.g., 'Beloved')"
-                    },
-                    "isbn": {
-                        "type": "string",
-                        "description": "Search by ISBN (10 or 13 digit)"
-                    }
-                },
-                # At least one search parameter must be provided
-                "anyOf": [
-                    {"required": ["query"]},
-                    {"required": ["author"]},
-                    {"required": ["title"]},
-                    {"required": ["isbn"]}
-                ]
-            }
-        ),
-        Tool(
-            name="get_best_sellers_lists",
-            description=(
-                "Get all available NYTimes Best Sellers list names. "
-                "The NYTimes publishes multiple best sellers lists including "
-                "Fiction, Non-Fiction, Children's books, Graphic Books, and more. "
-                "Use this to discover what lists are available before requesting "
-                "a specific list's books."
-            ),
-            inputSchema={
-                "type": "object",
-                "properties": {},
-                "required": []
-            }
-        ),
-        Tool(
             name="get_best_sellers",
             description=(
                 "Get books from a specific NYTimes Best Sellers list. "
                 "Returns the current or historical best sellers with rankings, "
                 "descriptions, and purchase links. Each book includes its rank, "
-                "weeks on the list, and movement from the previous week."
+                "weeks on the list, and movement from the previous week. "
+                "Use this when someone asks about current best sellers or "
+                "specific best seller lists like fiction, non-fiction, etc."
             ),
             inputSchema={
                 "type": "object",
@@ -115,10 +60,14 @@ async def list_tools() -> list[Tool]:
                     "list_name": {
                         "type": "string",
                         "description": (
-                            "The encoded name of the best sellers list "
-                            "(e.g., 'combined-print-and-e-book-fiction', "
-                            "'hardcover-nonfiction'). Use get_best_sellers_lists "
-                            "to see all available options."
+                            "The encoded name of the best sellers list. "
+                            "Common options include:\n"
+                            "- 'combined-print-and-e-book-fiction' (default)\n"
+                            "- 'combined-print-and-e-book-nonfiction'\n"
+                            "- 'hardcover-fiction'\n"
+                            "- 'hardcover-nonfiction'\n"
+                            "- 'trade-fiction-paperback'\n"
+                            "Use get_best_sellers_overview to see all available lists."
                         ),
                         "default": "combined-print-and-e-book-fiction"
                     },
@@ -126,11 +75,28 @@ async def list_tools() -> list[Tool]:
                         "type": "string",
                         "description": (
                             "Optional: The date of the list in YYYY-MM-DD format. "
-                            "If not provided, returns the most recent list."
+                            "If not provided, returns the most recent list. "
+                            "Lists are typically published weekly."
                         )
                     }
                 },
-                "required": ["list_name"]
+                "required": []
+            }
+        ),
+        Tool(
+            name="get_best_sellers_overview",
+            description=(
+                "Get an overview of ALL NYTimes Best Sellers lists. "
+                "Returns the top 5 books from each list (Fiction, Non-Fiction, "
+                "Children's, Graphic Books, etc.). This is perfect for getting "
+                "a comprehensive view of what's popular across all categories. "
+                "Use this when someone asks 'what are the best sellers' without "
+                "specifying a particular list, or when they want to see multiple lists."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {},
+                "required": []
             }
         )
     ]
@@ -171,77 +137,7 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
             return [TextContent(type="text", text=error_msg)]
     
     # Handle each tool based on its name
-    if name == "search_book_reviews":
-        # Extract search parameters
-        query = arguments.get("query")
-        author = arguments.get("author")
-        title = arguments.get("title")
-        isbn = arguments.get("isbn")
-        
-        logger.info(
-            f"Searching book reviews - query: {query}, author: {author}, "
-            f"title: {title}, isbn: {isbn}"
-        )
-        
-        try:
-            results = nyt_api.search_reviews(
-                query=query,
-                author=author,
-                title=title,
-                isbn=isbn
-            )
-            
-            # Format results as JSON for Claude
-            results_text = json.dumps(results, indent=2)
-            
-            return [
-                TextContent(
-                    type="text",
-                    text=results_text
-                )
-            ]
-            
-        except ValueError as e:
-            # Handle validation errors (e.g., no search parameters provided)
-            return [
-                TextContent(
-                    type="text",
-                    text=f"Invalid search parameters: {str(e)}"
-                )
-            ]
-        except Exception as e:
-            logger.error(f"Error searching book reviews: {e}")
-            return [
-                TextContent(
-                    type="text",
-                    text=f"Error searching book reviews: {str(e)}"
-                )
-            ]
-    
-    elif name == "get_best_sellers_lists":
-        logger.info("Fetching best sellers list names")
-        
-        try:
-            results = nyt_api.get_best_sellers_lists()
-            results_text = json.dumps(results, indent=2)
-            
-            return [
-                TextContent(
-                    type="text",
-                    text=results_text
-                )
-            ]
-            
-        except Exception as e:
-            logger.error(f"Error fetching best sellers lists: {e}")
-            return [
-                TextContent(
-                    type="text",
-                    text=f"Error fetching best sellers lists: {str(e)}"
-                )
-            ]
-    
-    elif name == "get_best_sellers":
+    if name == "get_best_sellers":
         # Extract parameters with defaults
         list_name = arguments.get("list_name", "combined-print-and-e-book-fiction")
         date = arguments.get("date")
@@ -269,6 +165,29 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
                 TextContent(
                     type="text",
                     text=f"Error fetching best sellers: {str(e)}"
+                )
+            ]
+    
+    elif name == "get_best_sellers_overview":
+        logger.info("Fetching best sellers overview")
+        
+        try:
+            results = nyt_api.get_best_sellers_overview()
+            results_text = json.dumps(results, indent=2)
+            
+            return [
+                TextContent(
+                    type="text",
+                    text=results_text
+                )
+            ]
+            
+        except Exception as e:
+            logger.error(f"Error fetching best sellers overview: {e}")
+            return [
+                TextContent(
+                    type="text",
+                    text=f"Error fetching best sellers overview: {str(e)}"
                 )
             ]
     
