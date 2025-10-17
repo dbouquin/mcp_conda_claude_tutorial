@@ -15,10 +15,10 @@ def test_api_key():
     """First, verify the API key is loaded correctly."""
     api_key = os.getenv("NYTIMES_API_KEY")
     if api_key:
-        print(f"✓ API key found (length: {len(api_key)} characters)")
-        print(f"  First 10 chars: {api_key[:10]}...")
+        print(f" API key found (length: {len(api_key)} characters)")
+        print(f"  First 5 chars: {api_key[:5]}...")
     else:
-        print("✗ API key not found!")
+        print(" API key not found!")
         return False
     return True
 
@@ -35,7 +35,7 @@ def test_best_sellers():
             list_name="combined-print-and-e-book-fiction"
         )
         
-        print(f"✓ List: {results['display_name']}")
+        print(f" List: {results['display_name']}")
         print(f"  Date: {results['bestsellers_date']}")
         print(f"  Number of books: {len(results['books'])}")
         print(f"\nTop 3 books:")
@@ -49,7 +49,7 @@ def test_best_sellers():
         return True
         
     except Exception as e:
-        print(f"✗ Test failed: {e}")
+        print(f" Test failed: {e}")
         api.close()
         return False
 
@@ -64,7 +64,7 @@ def test_overview():
     try:
         results = api.get_best_sellers_overview()
         
-        print(f"✓ Found {results['num_lists']} lists")
+        print(f" Found {results['num_lists']} lists")
         print(f"  Date: {results['bestsellers_date']}")
         print(f"\nFirst 3 lists:")
         
@@ -77,7 +77,7 @@ def test_overview():
         return True
         
     except Exception as e:
-        print(f"✗ Test failed: {e}")
+        print(f" Test failed: {e}")
         api.close()
         return False
 
@@ -88,12 +88,12 @@ if __name__ == "__main__":
     
     # Test 1: Check API key
     if not test_api_key():
-        print("\n⚠️  Fix your API key configuration before continuing")
+        print("\n Fix your API key configuration before continuing")
         exit(1)
     
     # Test 2: Best sellers list
     if not test_best_sellers():
-        print("\n⚠️  Basic API connectivity failed")
+        print("\n Basic API connectivity failed")
         print("\nTroubleshooting:")
         print("1. Verify your API key is valid at https://developer.nytimes.com/")
         print("2. Check that you've enabled the Books API for your key")
@@ -102,9 +102,9 @@ if __name__ == "__main__":
     
     # Test 3: Overview
     if not test_overview():
-        print("\n⚠️  Overview endpoint failed")
+        print("\n Overview endpoint failed")
         exit(1)
     
     print("\n" + "=" * 60)
-    print("✓ All tests passed! Your MCP server is ready to connect to Claude Desktop.")
+    print(" All tests passed! Your MCP server is ready to connect to Claude Desktop.")
     print("=" * 60)

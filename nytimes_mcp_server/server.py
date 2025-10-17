@@ -23,11 +23,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-# Create our MCP server instance
+# Create the MCP server instance
 # The server handles all the protocol communication with Claude Desktop
 server = Server("nytimes-books-mcp-server")
 
-# Create our NYTimes API client
+# Create the NYTimes API client
 # This will be initialized when the server starts
 nyt_api = None
 
@@ -192,7 +192,7 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
             ]
     
     else:
-        # This should never happen if we've configured everything correctly
+        # This should not happen if configured correctly
         raise ValueError(f"Unknown tool: {name}")
 
 
