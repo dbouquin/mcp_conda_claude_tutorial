@@ -4,7 +4,7 @@ Manual test script to verify the NYTimes API wrapper works.
 Run this before connecting to Claude Desktop to catch any API issues early.
 """
 
-from src.nytimes_mcp_server.nyt_api import NYTimesBookAPI
+from nytimes_mcp_server.nyt_api import NYTimesBookAPI
 from dotenv import load_dotenv
 import os
 
