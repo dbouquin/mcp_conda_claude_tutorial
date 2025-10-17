@@ -15,7 +15,7 @@ Perfect for developers who want to extend Claude's capabilities with custom data
 
 ## What is MCP?
 
-Model Context Protocol (MCP) is an open standard that allows AI assistants like Claude to connect to external data sources and tools. Think of it as a bridge that lets Claude access information beyond its training data - in this case, real-time data from the NYTimes Books API.
+Model Context Protocol (MCP) is an open standard that allows AI assistants like Claude to connect to external data sources and tools. Think of it as a bridge that lets Claude access information beyond its training data. In this case, real-time data from the NYTimes Books API.
 
 When you ask Claude a question about NYTimes best sellers, Claude recognizes it needs external data, calls this MCP server, which then queries the NYTimes API and returns the results.
 
@@ -267,9 +267,7 @@ python test_manual.py
 
 ## What's Next?
 
-This tutorial covers the basics of building an MCP server but more could be added
-
-### Potential Enhancements
+This tutorial covers the basics of building an MCP server but more could be added. Potential enhancements include:
 
 1. **Caching**: Store API results temporarily to reduce API calls
 2. **More endpoints**: The NYTimes Books API has additional endpoints (like reviews and history)
@@ -285,10 +283,6 @@ This tutorial covers the basics of building an MCP server but more could be adde
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-MIT License - feel free to use this code for learning and teaching purposes.
 
 ## Acknowledgments
 
