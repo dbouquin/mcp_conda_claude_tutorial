@@ -6,7 +6,10 @@
         "-m",
         "nytimes_mcp_server"
       ],
-      "cwd": "/Users/dbouquin/Documents/mpc_test"
+      "cwd": "/Users/dbouquin/Documents/mpc_test",
+      "env": {
+        "PYTHONPATH": "/Users/dbouquin/Documents/mpc_test"
+      }
     }
   }
 }
