@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "nytimes-books": {
+      "command": "/opt/anaconda3/envs/mcp_tutorial/bin/python",
+      "args": [
+        "-m",
+        "nytimes_mcp_server"
+      ],
+      "cwd": "/Users/dbouquin/Documents/mpc_test"
+    }
+  }
+}
