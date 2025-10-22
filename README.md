@@ -1,5 +1,5 @@
 # MCP basics with conda and Claude
-**In which Daina rapidly develops a tutorial for PyData VT**
+**In which Daina rapidly develops a tutorial for PyData VT (slides [here](https://docs.google.com/presentation/d/1JIWW1LB0hC44UTz869Y9ndkkRe8u7AgTV8CTPlH1H7Y/edit?usp=sharing)).**
 
 A Model Context Protocol (MCP) server that connects Claude Desktop to the New York Times Books API, enabling Claude to search and retrieve information about NYTimes Best Sellers lists.
 
