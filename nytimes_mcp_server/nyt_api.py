@@ -5,15 +5,15 @@ This module handles all interactions with the NYTimes Books API, keeping the MCP
 server code focused on protocol handling.
 """
 
-import httpx
-import os
-from typing import Optional, Dict, Any, List
-import logging
+import httpx # HTTP client for making API requests
+import os # for environment variable access
+from typing import Optional, Dict, Any, List # type hints so IDEs provide better autocompletion
+import logging # logging for debugging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__) # Create a logger for this module
 
 
-class NYTimesBookAPI:
+class NYTimesBookAPI: # Class to encapsulate API functionality
     """
     A wrapper for the NYTimes Books API.
     
@@ -21,7 +21,7 @@ class NYTimesBookAPI:
     It requires an API key which should be provided via environment variable.
     """
     
-    BASE_URL = "https://api.nytimes.com/svc/books/v3"
+    BASE_URL = "https://api.nytimes.com/svc/books/v3" # Class level constant for base URL
     
     def __init__(self, api_key: Optional[str] = None):
         """
@@ -34,21 +34,21 @@ class NYTimesBookAPI:
         Raises:
             ValueError: If no API key is provided or found in environment
         """
-        self.api_key = api_key or os.getenv("NYTIMES_API_KEY")
+        self.api_key = api_key or os.getenv("NYTIMES_API_KEY") # flexible API key loading
         
-        if not self.api_key:
+        if not self.api_key: # validation check to crash early if no key
             raise ValueError(
                 "NYTimes API key is required. Set NYTIMES_API_KEY environment "
                 "variable or pass api_key parameter."
             )
         
-        # Create HTTP client with a reasonable timeout
+        # Create HTTP client with a reasonable request timeout
         self.client = httpx.Client(timeout=30.0)
     
     def get_best_sellers(
         self, 
-        list_name: str = "combined-print-and-e-book-fiction",
-        date: Optional[str] = None
+        list_name: str = "combined-print-and-e-book-fiction", # default is fiction list
+        date: Optional[str] = None # None means get current list
     ) -> Dict[str, Any]:
         """
         Get books from a specific Best Sellers list.
@@ -72,35 +72,35 @@ class NYTimesBookAPI:
         
         # Build the URL - this is the documented format
         url = f"{self.BASE_URL}/lists/{date}/{list_name}.json"
-        params = {"api-key": self.api_key}
+        params = {"api-key": self.api_key} # API key as query parameter not URL
         
         logger.info(f"Fetching best sellers - URL: {url}")
         
-        try:
+        try: # make a GET request to the API
             response = self.client.get(url, params=params)
-            response.raise_for_status()
+            response.raise_for_status() # Raise error for bad responses
             
-            data = response.json()
+            data = response.json() # Parse JSON response into Python dict
             results = data.get("results", {})
             
             # Handle both single result and list of results
             if isinstance(results, list) and len(results) > 0:
                 results = results[0]
-            
+            # handle case where results is a dict directly
             return {
                 "list_name": results.get("list_name", ""),
                 "display_name": results.get("display_name", ""),
                 "bestsellers_date": results.get("bestsellers_date", ""),
                 "published_date": results.get("published_date", ""),
-                "books": self._format_bestseller_books(results.get("books", []))
+                "books": self._format_bestseller_books(results.get("books", [])) # nested formatting
             }
             
         except httpx.HTTPError as e:
             logger.error(f"Error querying NYTimes API: {e}")
-            if hasattr(e, 'response') and e.response is not None:
+            if hasattr(e, 'response') and e.response is not None: # not all errors have response
                 logger.error(f"Response status: {e.response.status_code}")
                 logger.error(f"Response body: {e.response.text}")
-            raise
+            raise # re-raise exception for caller (server.py) to handle 
     
     def get_best_sellers_overview(self) -> Dict[str, Any]:
         """
@@ -114,7 +114,7 @@ class NYTimesBookAPI:
         Raises:
             httpx.HTTPError: If the API request fails
         """
-        url = f"{self.BASE_URL}/lists/overview.json"
+        url = f"{self.BASE_URL}/lists/overview.json" # build URL for different endpoint
         params = {"api-key": self.api_key}
         
         logger.info("Fetching best sellers overview")
@@ -126,7 +126,7 @@ class NYTimesBookAPI:
             data = response.json()
             results = data.get("results", {})
             
-            lists = results.get("lists", [])
+            lists = results.get("lists", []) # returns multiple lists instead of one
             
             return {
                 "bestsellers_date": results.get("bestsellers_date", ""),
@@ -142,7 +142,7 @@ class NYTimesBookAPI:
                 logger.error(f"Response body: {e.response.text}")
             raise
     
-    def _format_bestseller_books(self, books: List[Dict]) -> List[Dict]:
+    def _format_bestseller_books(self, books: List[Dict]) -> List[Dict]: # list of raw book dicts to formatted dicts
         """
         Format best seller book information.
         
@@ -154,7 +154,7 @@ class NYTimesBookAPI:
         """
         formatted = []
         
-        for book in books:
+        for book in books: # each field has defaults
             formatted_book = {
                 "rank": book.get("rank", 0),
                 "rank_last_week": book.get("rank_last_week", 0),
@@ -183,7 +183,7 @@ class NYTimesBookAPI:
         """
         formatted = []
         
-        for lst in lists:
+        for lst in lists: # using lst instead of list to avoid shadowing built-in
             formatted_list = {
                 "list_id": lst.get("list_id", 0),
                 "list_name": lst.get("list_name", ""),
@@ -194,7 +194,7 @@ class NYTimesBookAPI:
             formatted.append(formatted_list)
         
         return formatted
-    
+    # Call is complete so we can close the client connection
     def close(self):
         """Close the HTTP client connection."""
         self.client.close()
