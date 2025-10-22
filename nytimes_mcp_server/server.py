@@ -8,32 +8,32 @@ import logging
 import json
 import os
 from typing import Any
-from mcp.server import Server
-from mcp.server.stdio import stdio_server
-from mcp.types import Tool, TextContent
-from dotenv import load_dotenv
+from mcp.server import Server # Core MCP server functionality
+from mcp.server.stdio import stdio_server # stdio transport for communication
+from mcp.types import Tool, TextContent # MCP types (data structures) for defining tools and responses
+from dotenv import load_dotenv # Load environment variables (API key) from .env file
 
-from .nyt_api import NYTimesBookAPI
+from .nyt_api import NYTimesBookAPI # Client for interacting with NYTimes Books API (. just means from the same package)
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Set up logging to help with debugging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO) # Show INFO level logs
+logger = logging.getLogger(__name__) # Logger for this module
 
 
-# Create the MCP server instance
+# Create the MCP server instance with unique name
 # The server handles all the protocol communication with Claude Desktop
 server = Server("nytimes-books-mcp-server")
 
-# Create the NYTimes API client
-# This will be initialized when the server starts
+# Create the NYTimes API client but don't initialize it yet
+# This will be initialized when the server starts so we can handle errors gracefully (lazy initialization)
 nyt_api = None
 
 
-@server.list_tools()
-async def list_tools() -> list[Tool]:
+@server.list_tools() # Decorator to define available tools for Claude (when Claude asks what tools are available server calls this)
+async def list_tools() -> list[Tool]: # MCP SDK handles async functions for us and this one returns a list of Tool objects
     """
     Define the tools that Claude can use.
     
@@ -46,7 +46,7 @@ async def list_tools() -> list[Tool]:
     return [
         Tool(
             name="get_best_sellers",
-            description=(
+            description=( # This description tells Claude when to use this tool!
                 "Get books from a specific NYTimes Best Sellers list. "
                 "Returns the current or historical best sellers with rankings, "
                 "descriptions, and purchase links. Each book includes its rank, "
@@ -54,9 +54,9 @@ async def list_tools() -> list[Tool]:
                 "Use this when someone asks about current best sellers or "
                 "specific best seller lists like fiction, non-fiction, etc."
             ),
-            inputSchema={
-                "type": "object",
-                "properties": {
+            inputSchema={ # JSON schema defining the input parameters for this tool
+                "type": "object", # The input is an object (dictionary)
+                "properties": { # Define the parameters
                     "list_name": {
                         "type": "string",
                         "description": (
@@ -80,12 +80,12 @@ async def list_tools() -> list[Tool]:
                         )
                     }
                 },
-                "required": []
+                "required": [] # No required parameters, both are optional
             }
         ),
         Tool(
             name="get_best_sellers_overview",
-            description=(
+            description=( # When to use this tool vs the other one!
                 "Get an overview of ALL NYTimes Best Sellers lists. "
                 "Returns the top 5 books from each list (Fiction, Non-Fiction, "
                 "Children's, Graphic Books, etc.). This is perfect for getting "
@@ -95,15 +95,15 @@ async def list_tools() -> list[Tool]:
             ),
             inputSchema={
                 "type": "object",
-                "properties": {},
+                "properties": {}, # No input parameters for this tool
                 "required": []
             }
         )
     ]
 
 
-@server.call_tool()
-async def call_tool(name: str, arguments: Any) -> list[TextContent]:
+@server.call_tool() # Registers this function to handle tool execution requests
+async def call_tool(name: str, arguments: Any) -> list[TextContent]: # name = which tool, arguments = parameters being passed
     """
     Handle tool execution requests from Claude.
     
@@ -120,7 +120,7 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
     Raises:
         ValueError: If an unknown tool is requested
     """
-    global nyt_api
+    global nyt_api # allows us to modify the module level variable
     
     # Initialize the API client if it hasn't been created yet
     if nyt_api is None:
@@ -139,27 +139,27 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
     # Handle each tool based on its name
     if name == "get_best_sellers":
         # Extract parameters with defaults
-        list_name = arguments.get("list_name", "combined-print-and-e-book-fiction")
+        list_name = arguments.get("list_name", "combined-print-and-e-book-fiction") # use .get with defaults
         date = arguments.get("date")
         
-        logger.info(f"Fetching best sellers - list: {list_name}, date: {date}")
+        logger.info(f"Fetching best sellers - list: {list_name}, date: {date}") # Log the request
         
-        try:
-            results = nyt_api.get_best_sellers(
+        try: # wrap the API call in error handling
+            results = nyt_api.get_best_sellers( # call the NYTimes API client method
                 list_name=list_name,
                 date=date
             )
             
-            results_text = json.dumps(results, indent=2)
+            results_text = json.dumps(results, indent=2) # Convert results to pretty JSON string
             
-            return [
+            return [ # wrap result in MCP's expected format
                 TextContent(
                     type="text",
                     text=results_text
                 )
             ]
             
-        except Exception as e:
+        except Exception as e: # return the error if anything goes wrong
             logger.error(f"Error fetching best sellers: {e}")
             return [
                 TextContent(
@@ -169,20 +169,20 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
             ]
     
     elif name == "get_best_sellers_overview":
-        logger.info("Fetching best sellers overview")
+        logger.info("Fetching best sellers overview") # log what we're doing
         
         try:
-            results = nyt_api.get_best_sellers_overview()
-            results_text = json.dumps(results, indent=2)
+            results = nyt_api.get_best_sellers_overview() # call the API method
+            results_text = json.dumps(results, indent=2) # Convert to pretty JSON string
             
-            return [
+            return [ # wrap result in MCP's expected format
                 TextContent(
                     type="text",
                     text=results_text
                 )
             ]
             
-        except Exception as e:
+        except Exception as e: # handle errors
             logger.error(f"Error fetching best sellers overview: {e}")
             return [
                 TextContent(
@@ -192,18 +192,18 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
             ]
     
     else:
-        # This should not happen if configured correctly
+        # Unknown tool handler - if Claude requests a tool we don't know throw an error (this shouldn't happen if configured correctly)
         raise ValueError(f"Unknown tool: {name}")
 
 
-async def main():
+async def main(): # main entry point to start the server
     """
     Main entry point for the MCP server.
     
     This function starts the server and keeps it running, listening for
     requests from Claude Desktop over stdio.
     """
-    logger.info("Starting NYTimes Books MCP Server")
+    logger.info("Starting NYTimes Books MCP Server") # Log server start
     
     # Verify API key is available before starting
     api_key = os.getenv("NYTIMES_API_KEY")
@@ -218,15 +218,15 @@ async def main():
     
     # Run the server using stdio transport
     # This means Claude Desktop will communicate with us via standard input/output
-    async with stdio_server() as (read_stream, write_stream):
-        await server.run(
-            read_stream,
-            write_stream,
+    async with stdio_server() as (read_stream, write_stream): # async context manager to handle stdio streams
+        await server.run( # starts server and keeps it running
+            read_stream, # Read stream from stdio
+            write_stream, # Write stream to stdio
             server.create_initialization_options()
         )
 
 
 # This is the entry point when the script is run directly
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+if __name__ == "__main__": # only runs if this file is executed directly
+    import asyncio # Python's async library
+    asyncio.run(main()) # Run the main async function to start the server
