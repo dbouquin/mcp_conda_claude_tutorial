@@ -153,8 +153,23 @@ Add your server configuration (replace paths with your actual paths from the ste
 
 **Configuration explained:**
 - `command`: Full path to your conda environment's Python interpreter
-- `args`: Runs the package as a module
-- `cwd`: Your project root directory (where `.env` is located)
+    - Must be the absolute path to the Python interpreter
+    - Points to Python in your specific conda environment
+
+*Understanding the path:*
+```
+/opt/anaconda3/envs/mcp_tutorial/bin/python
+│    │         │    │            │   └─ Python executable
+│    │         │    │            └───── bin directory (executables)
+│    │         │    └────────────────── Your environment name
+│    │         └─────────────────────── conda environments directory
+│    └───────────────────────────────── Anaconda installation
+└────────────────────────────────────── Root directory
+```
+- `args`: `-m` tells Python to run the package as a module and `nytimes_mcp_server` is the name of our package 
+- `cwd`: Current working directory (where `.env` is located)
+    - Must be the absolute path to where your code lives
+    - This is where the server runs
 - `env.PYTHONPATH`: Tells Python where to find your package
 
 ### Step 3: Restart Claude Desktop
