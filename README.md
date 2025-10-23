@@ -115,7 +115,8 @@ which python
 
 ### Step 2: Configure Claude Desktop
 
-Edit the Claude Desktop configuration file. You can do this by navigating to **Settings > Developer > Edit Config** OR run the following:
+Edit the Claude Desktop configuration file.           
+You can do this by navigating to **Settings > Developer > Edit Config** OR run the following:
 
 **macOS:** (TextEdit or your favorite text editor)
 ```bash
