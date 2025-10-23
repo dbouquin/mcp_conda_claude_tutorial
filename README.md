@@ -115,7 +115,7 @@ which python
 
 ### Step 2: Configure Claude Desktop
 
-Edit the Claude Desktop configuration file. You can do this by navigating to Settings > Developer > Edit Config or run the following:
+Edit the Claude Desktop configuration file. You can do this by navigating to **Settings > Developer > Edit Config** OR run the following:
 
 **macOS:** (TextEdit or your favorite text editor)
 ```bash
@@ -176,7 +176,7 @@ Add your server configuration (replace paths with your actual paths from the ste
 
 1. Completely quit Claude Desktop (not just close the window)
 2. Reopen Claude Desktop
-3. Navigate to Settings > Developer to see if your local MCP server is running successfully
+3. Navigate to **Settings > Developer** to see if your local MCP server is running successfully
 
 ### Step 4: Try It Out!
 
