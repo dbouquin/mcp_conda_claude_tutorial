@@ -292,6 +292,8 @@ This tutorial covers the basics of building an MCP server but more could be adde
 4. **Error recovery**: Add retry logic for transient failures
 5. **Rate limiting**: Implement request throttling to respect API limits
 
+A separate tutorial is in the works for MCP + conda + Claude Code.
+
 ### Learning More About MCP
 
 - [MCP Documentation](https://modelcontextprotocol.io/)
