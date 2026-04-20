@@ -1,6 +1,11 @@
 # MCP basics with conda and Claude
 **In which Daina rapidly develops a tutorial for PyData VT (slides [here](https://docs.google.com/presentation/d/1JIWW1LB0hC44UTz869Y9ndkkRe8u7AgTV8CTPlH1H7Y/edit?usp=sharing); video [here](https://www.youtube.com/watch?v=bPc0afWxEwo)).**
 
+*Owner: Daina Bouquin (@dbouquin)*
+*Last tested: 2026-03-17*
+*Status: Active*
+*Estimated time: 45-60 minutes*
+
 A Model Context Protocol (MCP) server that connects Claude Desktop to the New York Times Books API, enabling Claude to search and retrieve information about NYTimes Best Sellers lists.
 
 This tutorial demonstrates how to build an MCP server using Python and conda, providing a practical introduction to extending Claude's capabilities with external data sources.
@@ -29,9 +34,12 @@ This MCP server provides two tools that Claude can use:
 
 ## Prerequisites
 
+- Basic Python knowledge
+- Comfortable using the terminal
 - [Anaconda](https://www.anaconda.com/download) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html) installed
 - [Claude Desktop](https://claude.ai/download) installed
 - A [NYTimes Developer API key](https://developer.nytimes.com/get-started) (free)
+   - The NYTimes Developer API is a dependency without a fallback
 
 ## Project Structure
 ```
@@ -143,9 +151,9 @@ Add your server configuration (replace paths with your actual paths from the ste
         "-m",
         "nytimes_mcp_server"
       ],
-      "cwd": "/path/to/nytimes-mcp-server",
+      "cwd": "/path/to/mcp_conda_claude_tutorial",
       "env": {
-        "PYTHONPATH": "/path/to/nytimes-mcp-server"
+        "PYTHONPATH": "/path/to/mcp_conda_claude_tutorial"
       }
     }
   }
