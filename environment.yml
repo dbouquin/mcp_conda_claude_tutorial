@@ -1,0 +1,6 @@
+   name: mcp_tutorial
+   dependencies:
+     - python=3.13
+     - mcp==1.x.x
+     - httpx==0.x.x
+     - python-dotenv==1.x.x
