@@ -1,4 +1,5 @@
-# MCP basics with conda and Claude
+# MCP basics with conda and Claude - Build your own MCP Server (tools), connect a knowledge source, make it callable  
+
 **In which Daina rapidly develops a tutorial for PyData VT (slides [here](https://docs.google.com/presentation/d/1JIWW1LB0hC44UTz869Y9ndkkRe8u7AgTV8CTPlH1H7Y/edit?usp=sharing); video [here](https://www.youtube.com/watch?v=bPc0afWxEwo)).**
 
 *Owner: Daina Bouquin (@dbouquin)*
